@@ -7,16 +7,22 @@ import com.akosua.pharmacy.model.TransactionType;
 import com.akosua.pharmacy.rules.DispenseRequest;
 import com.akosua.pharmacy.rules.DispenseRejectedException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Pharmacy {
-    public String name;
+    // Pharmacy owns the transaction id counter so ids are unique across all
+    // transactions. No other class can increment it.
     private int transactionCounter = 1;
-    public List<Medication> meds = new ArrayList<>();
-    public List<Customer> customers = new ArrayList<>();
-    private List<Transaction> transactions = new ArrayList<>();
+    private final String name;
+    private final List<Medication> meds = new ArrayList<>();
+    private final List<Customer> customers = new ArrayList<>();
+    private final List<Transaction> transactions = new ArrayList<>();
 
     public Pharmacy(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Pharmacy name cannot be blank");
+        }
         this.name = name;
     }
 
@@ -61,8 +67,11 @@ public class Pharmacy {
         System.out.println("Restocked " + qty + " x " + m.getName());
     }
 
+    // Returns an unmodifiable view of the transaction list. The view reflects
+    // later additions but throws UnsupportedOperationException if the caller
+    // tries to modify it, protecting the audit trail from outside changes.
     public List<Transaction> getTransactions() {
-        return transactions; // hand the list back so callers can read it
+        return Collections.unmodifiableList(transactions);
     }
 
     public void printReport() {
