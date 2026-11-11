@@ -6,7 +6,7 @@ public class Medication {
     private int stock;
     private final String category; // "OTC" or "PRESCRIPTION"
     private final int id;
-    static int counter = 1;
+    private static int counter = 1;
 
     public Medication(String name, double price, int stock, String category) {
         if (name == null || name.isBlank()) {
