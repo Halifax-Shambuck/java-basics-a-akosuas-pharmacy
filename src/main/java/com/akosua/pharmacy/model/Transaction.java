@@ -1,5 +1,10 @@
 package com.akosua.pharmacy.model;
 
+// A transaction is an immutable historical fact recorded after a successful
+// dispense or restock. Using a record enforces that it cannot change after
+// creation and gives readable toString output automatically.
+// prescriber is null for OTC dispenses and restocks. It is only set when a
+// prescription was verified by the rule before the dispense went ahead.
 public record Transaction(
         int id,
         String customerName,
@@ -7,9 +12,11 @@ public record Transaction(
         int qty,
         double total,
         TransactionType type,
-        // null for OTC dispenses and restocks; only set when a prescription was verified
         String prescriber
 ) {
+    // Enforces that ids are positive, names are present, quantity is positive,
+    // and total is not negative. Total can be zero because restocks carry no
+    // monetary value.
     public Transaction {
         if (id <= 0) throw new IllegalArgumentException("id must be positive");
         if (customerName == null || customerName.isBlank())
