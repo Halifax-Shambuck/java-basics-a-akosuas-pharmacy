@@ -6,7 +6,9 @@ public record Transaction(
         String medName,
         int qty,
         double total,
-        TransactionType type
+        TransactionType type,
+        // null for OTC dispenses and restocks; only set when a prescription was verified
+        String prescriber
 ) {
     public Transaction {
         if (id <= 0) throw new IllegalArgumentException("id must be positive");
@@ -18,3 +20,4 @@ public record Transaction(
         if (total < 0) throw new IllegalArgumentException("total cannot be negative");
     }
 }
+

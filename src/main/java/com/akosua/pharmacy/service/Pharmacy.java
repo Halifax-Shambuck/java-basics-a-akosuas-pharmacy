@@ -43,19 +43,21 @@ public class Pharmacy {
             m.reduceStock(qty);
             System.out.println("Dispensed " + qty + " x " + m.getName() + " to " + c.getName()
                     + m.confirmationSuffix(request) + " for GHS " + total);
+            c.recordDispense(m.getName(), qty);
+            transactions.add(new Transaction(transactionCounter++, c.getName(), m.getName(), qty, total,
+                    TransactionType.DISPENSE, request.prescriber()));
 
         } catch (DispenseRejectedException e) {
             System.out.println(e.getMessage());
             return;
         }
-        c.recordDispense(m.getName(), qty);
-        transactions.add(new Transaction(transactionCounter++, c.getName(), m.getName(), qty, total, TransactionType.DISPENSE));
     }
 
     public void restock(Medication m, int qty) {
         m.increaseStock(qty);
 
-        transactions.add(new Transaction(transactionCounter++, "(supplier)", m.getName(), qty, 0, TransactionType.RESTOCK));
+        transactions.add(new Transaction(transactionCounter++, "(supplier)", m.getName(), qty, 0,
+                TransactionType.RESTOCK, null));
         System.out.println("Restocked " + qty + " x " + m.getName());
     }
 
