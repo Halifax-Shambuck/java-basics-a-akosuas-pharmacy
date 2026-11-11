@@ -1,6 +1,8 @@
 package com.akosua.pharmacy.model;
 
-public class InsufficientStockException extends RuntimeException {
+import com.akosua.pharmacy.rules.DispenseRejectedException;
+
+public class InsufficientStockException extends DispenseRejectedException {
     public InsufficientStockException(String message) {
         super(message);
     }

@@ -1,22 +1,25 @@
 package com.akosua.pharmacy.app;
 // Akosua's Pharmacy - stock and dispensing tracker
+
 // Original program. Written in a hurry by the intern who has since left.
 // It works, but the team is nervous about changing it. That is your job.
 //
 // Run it as-is first to see what it currently does before you change anything.
 
 import com.akosua.pharmacy.model.Medication;
+import com.akosua.pharmacy.rules.OtcRule;
+import com.akosua.pharmacy.rules.PrescriptionRule;
 import com.akosua.pharmacy.model.Customer;
 import com.akosua.pharmacy.service.Pharmacy;
-
 
 public class PharmacyTracker {
 
     public static void main(String[] args) {
         Pharmacy p = new Pharmacy("Akosua's Pharmacy");
 
-        Medication paracetamol = new Medication("Paracetamol 500mg", 12.50, 100, "OTC");
-        Medication amoxicillin = new Medication("Amoxicillin 250mg", 30.00, 40, "PRESCRIPTION");
+        Medication paracetamol = new Medication("Paracetamol 500mg", 12.50, 100, new OtcRule());
+        Medication amoxicillin = new Medication("Amoxicillin 250mg", 30.00, 40, new PrescriptionRule());
+
         p.addMedication(paracetamol);
         p.addMedication(amoxicillin);
 
@@ -37,11 +40,3 @@ public class PharmacyTracker {
         p.printReport();
     }
 }
-
-
-
-
-
-
-
-

@@ -5,6 +5,8 @@ import com.akosua.pharmacy.model.Customer;
 import com.akosua.pharmacy.model.InsufficientStockException;
 import com.akosua.pharmacy.model.Transaction;
 import com.akosua.pharmacy.model.TransactionType;
+import com.akosua.pharmacy.rules.DispenseRequest;
+import com.akosua.pharmacy.rules.DispenseRejectedException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,32 +28,22 @@ public class Pharmacy {
         customers.add(c);
     }
 
-    // Dispense medicine to a customer. The rules depend on the kind of medicine.
+    // Dispense medicine to a customer. The medication's rule decides whether the
+    // request is acceptable and what appears in the confirmation line.
     public void dispense(Customer c, Medication m, int qty, String prescriber) {
         double total = 0;
         try {
-            if (m.getCategory().equals("OTC")) {
-                total = m.getPrice() * qty;
-                if (c.kind.equals("REGISTERED")) {
-                    total = total * 0.95; // registered patients get 5% off
-                }
-                m.reduceStock(qty);
-                System.out.println("Dispensed " + qty + " x " + m.getName() + " to " + c.name
-                        + " for GHS " + total);
-            } else if (m.getCategory().equals("PRESCRIPTION")) {
-                if (prescriber == null) {
-                    System.out.println("Cannot dispense " + m.getName() + " without a prescriber");
-                    return;
-                }
-                total = m.getPrice() * qty;
-                if (c.kind.equals("REGISTERED")) {
-                    total = total * 0.95; // registered patients get 5% off
-                }
-                m.reduceStock(qty);
-                System.out.println("Dispensed " + qty + " x " + m.getName() + " to " + c.name
-                        + " (prescribed by " + prescriber + ") for GHS " + total);
+            DispenseRequest request = new DispenseRequest(m.getName(), qty, prescriber);
+            m.validate(request);
+            total = m.getPrice() * qty;
+            if (c.kind.equals("REGISTERED")) {
+                total = total * 0.95; // registered customers get 5% off
             }
-        } catch (InsufficientStockException e) {
+            m.reduceStock(qty);
+            System.out.println("Dispensed " + qty + " x " + m.getName() + " to " + c.name
+                    + m.confirmationSuffix(request) + " for GHS " + total);
+
+        } catch (DispenseRejectedException e) {
             System.out.println(e.getMessage());
             return;
         }
@@ -75,7 +67,7 @@ public class Pharmacy {
         System.out.println("=== " + name + " - end of day ===");
         System.out.println("Stock levels:");
         for (Medication m : meds) {
-            System.out.println("  " + m.getName() + " (" + m.getCategory() + "): " + m.getStock() + " in stock");
+            System.out.println("  " + m.getName() + " (" + m.categoryLabel() + "): " + m.getStock() + " in stock");
         }
         System.out.println("Transactions today: " + transactions.size());
     }
