@@ -6,10 +6,10 @@ public class Transaction {
     public String medName;
     public int qty;
     public double total;
-    public String type; // "DISPENSE" or "RESTOCK"
+    public TransactionType type; // enum ensures only valid transaction types can be recorded
     static int counter = 1;
 
-    public Transaction(String customerName, String medName, int qty, double total, String type) {
+    public Transaction(String customerName, String medName, int qty, double total, TransactionType type) {
         this.id = counter;
         counter++;
         this.customerName = customerName;

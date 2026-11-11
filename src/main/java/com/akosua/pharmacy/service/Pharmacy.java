@@ -3,6 +3,7 @@ package com.akosua.pharmacy.service;
 import com.akosua.pharmacy.model.Medication;
 import com.akosua.pharmacy.model.Customer;
 import com.akosua.pharmacy.model.Transaction;
+import com.akosua.pharmacy.model.TransactionType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,12 +50,13 @@ public class Pharmacy {
                     + " (prescribed by " + prescriber + ") for GHS " + total);
         }
         c.history.add("Got " + qty + " x " + m.name);
-        transactions.add(new Transaction(c.name, m.name, qty, total, "DISPENSE"));
+        transactions.add(new Transaction(c.name, m.name, qty, total, TransactionType.DISPENSE));
     }
 
     public void restock(Medication m, int qty) {
         m.stock = m.stock + qty;
-        transactions.add(new Transaction("(supplier)", m.name, qty, 0, "RESTOCK"));
+
+        transactions.add(new Transaction("(supplier)", m.name, qty, 0, TransactionType.RESTOCK));
         System.out.println("Restocked " + qty + " x " + m.name);
     }
 
