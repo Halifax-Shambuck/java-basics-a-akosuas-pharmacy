@@ -9,8 +9,10 @@ package com.akosua.pharmacy.app;
 import com.akosua.pharmacy.model.Medication;
 import com.akosua.pharmacy.rules.OtcRule;
 import com.akosua.pharmacy.rules.PrescriptionRule;
-import com.akosua.pharmacy.model.Customer;
 import com.akosua.pharmacy.service.Pharmacy;
+import com.akosua.pharmacy.model.Customer;
+import com.akosua.pharmacy.model.WalkInCustomer;
+import com.akosua.pharmacy.model.RegisteredPatient;
 
 public class PharmacyTracker {
 
@@ -23,9 +25,8 @@ public class PharmacyTracker {
         p.addMedication(paracetamol);
         p.addMedication(amoxicillin);
 
-        Customer kofi = new Customer("Kofi Mensah", "WALK_IN");
-        Customer ama = new Customer("Ama Owusu", "REGISTERED");
-        ama.phone = "0244 000 000"; // registered patients have contact details on file
+        Customer kofi = new WalkInCustomer("Kofi Mensah");
+        Customer ama = new RegisteredPatient("Ama Owusu", "0244 000 000"); // registered patients have contact details on file
         p.addCustomer(kofi);
         p.addCustomer(ama);
 

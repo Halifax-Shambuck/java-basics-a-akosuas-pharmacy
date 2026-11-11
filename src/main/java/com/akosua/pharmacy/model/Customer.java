@@ -1,20 +1,15 @@
 package com.akosua.pharmacy.model;
 
-import java.util.ArrayList;
-import java.util.List;
+public interface Customer {
+    // Returns the customer's name for the confirmation line and transaction record.
+    String getName();
 
-public class Customer {
-    public String name;
-    public String kind; // "WALK_IN" or "REGISTERED"
-    public String phone;
-    public int id;
-    public List<String> history = new ArrayList<>();
-    static int counter = 1;
+    // Returns the amount owed after applying whatever discount this customer type
+    // has. Walk-in customers return the subtotal unchanged.
+    double applyDiscount(double subtotal);
 
-    public Customer(String name, String kind) {
-        this.id = counter;
-        counter++;
-        this.name = name;
-        this.kind = kind;
-    }
+    // Records that this customer received a dispense. Pharmacy passes the raw
+    // facts and each implementation decides what to do with them.
+    // WalkInCustomer does nothing. RegisteredPatient adds to its history.
+    void recordDispense(String medicineName, int quantity);
 }

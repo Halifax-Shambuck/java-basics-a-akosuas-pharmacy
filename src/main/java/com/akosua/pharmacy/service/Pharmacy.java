@@ -2,7 +2,6 @@ package com.akosua.pharmacy.service;
 
 import com.akosua.pharmacy.model.Medication;
 import com.akosua.pharmacy.model.Customer;
-import com.akosua.pharmacy.model.InsufficientStockException;
 import com.akosua.pharmacy.model.Transaction;
 import com.akosua.pharmacy.model.TransactionType;
 import com.akosua.pharmacy.rules.DispenseRequest;
@@ -35,20 +34,21 @@ public class Pharmacy {
         try {
             DispenseRequest request = new DispenseRequest(m.getName(), qty, prescriber);
             m.validate(request);
-            total = m.getPrice() * qty;
-            if (c.kind.equals("REGISTERED")) {
-                total = total * 0.95; // registered customers get 5% off
-            }
+            // Discount applies to the subtotal (price * qty), not to the unit price.
+            // Changing the order of multiplication can shift the last floating-point bit.
+            double subtotal = m.getPrice() * qty;
+            total = c.applyDiscount(subtotal);
+
             m.reduceStock(qty);
-            System.out.println("Dispensed " + qty + " x " + m.getName() + " to " + c.name
+            System.out.println("Dispensed " + qty + " x " + m.getName() + " to " + c.getName()
                     + m.confirmationSuffix(request) + " for GHS " + total);
 
         } catch (DispenseRejectedException e) {
             System.out.println(e.getMessage());
             return;
         }
-        c.history.add("Got " + qty + " x " + m.getName());
-        transactions.add(new Transaction(c.name, m.getName(), qty, total, TransactionType.DISPENSE));
+        c.recordDispense(m.getName(), qty);
+        transactions.add(new Transaction(c.getName(), m.getName(), qty, total, TransactionType.DISPENSE));
     }
 
     public void restock(Medication m, int qty) {
