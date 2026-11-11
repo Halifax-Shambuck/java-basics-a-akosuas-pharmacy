@@ -2,6 +2,7 @@ package com.akosua.pharmacy.service;
 
 import com.akosua.pharmacy.model.Medication;
 import com.akosua.pharmacy.model.Customer;
+import com.akosua.pharmacy.model.InsufficientStockException;
 import com.akosua.pharmacy.model.Transaction;
 import com.akosua.pharmacy.model.TransactionType;
 import java.util.ArrayList;
@@ -28,36 +29,41 @@ public class Pharmacy {
     // Dispense medicine to a customer. The rules depend on the kind of medicine.
     public void dispense(Customer c, Medication m, int qty, String prescriber) {
         double total = 0;
-        if (m.category.equals("OTC")) {
-            total = m.price * qty;
-            if (c.kind.equals("REGISTERED")) {
-                total = total * 0.95; // registered patients get 5% off
+        try {
+            if (m.getCategory().equals("OTC")) {
+                total = m.getPrice() * qty;
+                if (c.kind.equals("REGISTERED")) {
+                    total = total * 0.95; // registered patients get 5% off
+                }
+                m.reduceStock(qty);
+                System.out.println("Dispensed " + qty + " x " + m.getName() + " to " + c.name
+                        + " for GHS " + total);
+            } else if (m.getCategory().equals("PRESCRIPTION")) {
+                if (prescriber == null) {
+                    System.out.println("Cannot dispense " + m.getName() + " without a prescriber");
+                    return;
+                }
+                total = m.getPrice() * qty;
+                if (c.kind.equals("REGISTERED")) {
+                    total = total * 0.95; // registered patients get 5% off
+                }
+                m.reduceStock(qty);
+                System.out.println("Dispensed " + qty + " x " + m.getName() + " to " + c.name
+                        + " (prescribed by " + prescriber + ") for GHS " + total);
             }
-            m.stock = m.stock - qty;
-            System.out.println("Dispensed " + qty + " x " + m.name + " to " + c.name
-                    + " for GHS " + total);
-        } else if (m.category.equals("PRESCRIPTION")) {
-            if (prescriber == null) {
-                System.out.println("Cannot dispense " + m.name + " without a prescriber");
-                return;
-            }
-            total = m.price * qty;
-            if (c.kind.equals("REGISTERED")) {
-                total = total * 0.95; // registered patients get 5% off
-            }
-            m.stock = m.stock - qty;
-            System.out.println("Dispensed " + qty + " x " + m.name + " to " + c.name
-                    + " (prescribed by " + prescriber + ") for GHS " + total);
+        } catch (InsufficientStockException e) {
+            System.out.println(e.getMessage());
+            return;
         }
-        c.history.add("Got " + qty + " x " + m.name);
-        transactions.add(new Transaction(c.name, m.name, qty, total, TransactionType.DISPENSE));
+        c.history.add("Got " + qty + " x " + m.getName());
+        transactions.add(new Transaction(c.name, m.getName(), qty, total, TransactionType.DISPENSE));
     }
 
     public void restock(Medication m, int qty) {
-        m.stock = m.stock + qty;
+        m.increaseStock(qty);
 
-        transactions.add(new Transaction("(supplier)", m.name, qty, 0, TransactionType.RESTOCK));
-        System.out.println("Restocked " + qty + " x " + m.name);
+        transactions.add(new Transaction("(supplier)", m.getName(), qty, 0, TransactionType.RESTOCK));
+        System.out.println("Restocked " + qty + " x " + m.getName());
     }
 
     public List<Transaction> getTransactions() {
@@ -69,7 +75,7 @@ public class Pharmacy {
         System.out.println("=== " + name + " - end of day ===");
         System.out.println("Stock levels:");
         for (Medication m : meds) {
-            System.out.println("  " + m.name + " (" + m.category + "): " + m.stock + " in stock");
+            System.out.println("  " + m.getName() + " (" + m.getCategory() + "): " + m.getStock() + " in stock");
         }
         System.out.println("Transactions today: " + transactions.size());
     }

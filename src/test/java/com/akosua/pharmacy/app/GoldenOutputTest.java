@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class GoldenOutputTest {
 
     @Test
-    void outputMatchesOriginalBaseline() throws Exception {
+    void outputMatchesExpectedAfterStockFix() throws Exception {
         PrintStream originalOut = System.out;
         ByteArrayOutputStream captured = new ByteArrayOutputStream();
         try {
@@ -25,8 +25,8 @@ public class GoldenOutputTest {
         String actual = normalise(captured.toString(StandardCharsets.UTF_8));
 
         String expected;
-        try (InputStream in = GoldenOutputTest.class.getResourceAsStream("/baseline-output.txt")) {
-            assertNotNull(in, "baseline-output.txt not found in src/test/resources");
+        try (InputStream in = GoldenOutputTest.class.getResourceAsStream("/expected-after-fix.txt")) {
+            assertNotNull(in, "expected-after-fix.txt not found in src/test/resources");
             expected = normalise(new String(in.readAllBytes(), StandardCharsets.UTF_8));
         }
 
