@@ -11,6 +11,7 @@ import java.util.List;
 
 public class Pharmacy {
     public String name;
+    private int transactionCounter = 1;
     public List<Medication> meds = new ArrayList<>();
     public List<Customer> customers = new ArrayList<>();
     private List<Transaction> transactions = new ArrayList<>();
@@ -48,13 +49,13 @@ public class Pharmacy {
             return;
         }
         c.recordDispense(m.getName(), qty);
-        transactions.add(new Transaction(c.getName(), m.getName(), qty, total, TransactionType.DISPENSE));
+        transactions.add(new Transaction(transactionCounter++, c.getName(), m.getName(), qty, total, TransactionType.DISPENSE));
     }
 
     public void restock(Medication m, int qty) {
         m.increaseStock(qty);
 
-        transactions.add(new Transaction("(supplier)", m.getName(), qty, 0, TransactionType.RESTOCK));
+        transactions.add(new Transaction(transactionCounter++, "(supplier)", m.getName(), qty, 0, TransactionType.RESTOCK));
         System.out.println("Restocked " + qty + " x " + m.getName());
     }
 
