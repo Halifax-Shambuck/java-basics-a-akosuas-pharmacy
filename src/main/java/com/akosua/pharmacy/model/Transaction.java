@@ -1,5 +1,4 @@
 package com.akosua.pharmacy.model;
-
 // A transaction is an immutable historical fact recorded after a successful
 // dispense or restock. Using a record enforces that it cannot change after
 // creation and gives readable toString output automatically.
@@ -11,7 +10,7 @@ public record Transaction(
         String customerName,
         String medName,
         int qty,
-        double total,
+        Money total,
         TransactionType type,
         String prescriber
 ) {
@@ -25,7 +24,7 @@ public record Transaction(
         if (medName == null || medName.isBlank())
             throw new IllegalArgumentException("medicine name cannot be blank");
         if (qty <= 0) throw new IllegalArgumentException("quantity must be positive");
-        if (total < 0) throw new IllegalArgumentException("total cannot be negative");
+        if (total == null) throw new IllegalArgumentException("total cannot be null");
     }
 }
 
