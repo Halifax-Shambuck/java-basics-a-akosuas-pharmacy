@@ -16,7 +16,7 @@ public class Pharmacy {
     // transactions. No other class can increment it.
     private int transactionCounter = 1;
     private final String name;
-    private final List<Medication> meds = new ArrayList<>();
+    private final List<Medication> medications = new ArrayList<>();
     private final List<Customer> customers = new ArrayList<>();
     private final List<Transaction> transactions = new ArrayList<>();
 
@@ -27,30 +27,30 @@ public class Pharmacy {
         this.name = name;
     }
 
-    public void addMedication(Medication m) {
-        meds.add(m);
+    public void addMedication(Medication medication) {
+        medications.add(medication);
     }
 
-    public void addCustomer(Customer c) {
-        customers.add(c);
+    public void addCustomer(Customer customer) {
+        customers.add(customer);
     }
 
     // Dispense medicine to a customer. The medication's rule decides whether the
     // request is acceptable and what appears in the confirmation line.
-    public void dispense(Customer c, Medication m, int qty, String prescriber) {
+    public void dispense(Customer customer, Medication medication, int quantity, String prescriber) {
         Money total = Money.ZERO;
         try {
-            DispenseRequest request = new DispenseRequest(m.getName(), qty, prescriber);
-            m.validate(request);
+            DispenseRequest request = new DispenseRequest(medication.getName(), quantity, prescriber);
+            medication.validate(request);
             // Discount applies to the subtotal because that is the business rule.
-            Money subtotal = m.getPrice().multiplyBy(qty);
-            total = c.applyDiscount(subtotal);
+            Money subtotal = medication.getPrice().multiplyBy(quantity);
+            total = customer.applyDiscount(subtotal);
 
-            m.reduceStock(qty);
-            System.out.println("Dispensed " + qty + " x " + m.getName() + " to " + c.getName()
-                    + m.confirmationSuffix(request) + " for GHS " + total);
-            c.recordDispense(m.getName(), qty);
-            transactions.add(new Transaction(transactionCounter++, c.getName(), m.getName(), qty, total,
+            medication.reduceStock(quantity);
+            System.out.println("Dispensed " + quantity + " x " + medication.getName() + " to " + customer.getName()
+                    + medication.confirmationSuffix(request) + " for GHS " + total);
+            customer.recordDispense(medication.getName(), quantity);
+            transactions.add(new Transaction(transactionCounter++, customer.getName(), medication.getName(), quantity, total,
                     TransactionType.DISPENSE, request.prescriber()));
 
         } catch (DispenseRejectedException e) {
@@ -59,13 +59,13 @@ public class Pharmacy {
         }
     }
 
-    public void restock(Medication m, int qty) {
-        m.increaseStock(qty);
+    public void restock(Medication medication, int quantity) {
+        medication.increaseStock(quantity);
 
-        transactions.add(new Transaction(transactionCounter++, "(supplier)", m.getName(), qty, Money.ZERO,
+        transactions.add(new Transaction(transactionCounter++, "(supplier)", medication.getName(), quantity, Money.ZERO,
         TransactionType.RESTOCK, null));
 
-        System.out.println("Restocked " + qty + " x " + m.getName());
+        System.out.println("Restocked " + quantity + " x " + medication.getName());
     }
 
     // Returns an unmodifiable view of the transaction list. The view reflects
@@ -79,8 +79,8 @@ public class Pharmacy {
         System.out.println();
         System.out.println("=== " + name + " - end of day ===");
         System.out.println("Stock levels:");
-        for (Medication m : meds) {
-            System.out.println("  " + m.getName() + " (" + m.categoryLabel() + "): " + m.getStock() + " in stock");
+        for (Medication medication : medications) {
+            System.out.println("  " + medication.getName() + " (" + medication.categoryLabel() + "): " + medication.getStock() + " in stock");
         }
         System.out.println("Transactions today: " + transactions.size());
     }
