@@ -8,8 +8,8 @@ package com.akosua.pharmacy.model;
 public record Transaction(
         int id,
         String customerName,
-        String medName,
-        int qty,
+        String medicationName,
+        int quantity,
         Money total,
         TransactionType type,
         String prescriber
@@ -21,9 +21,9 @@ public record Transaction(
         if (id <= 0) throw new IllegalArgumentException("id must be positive");
         if (customerName == null || customerName.isBlank())
             throw new IllegalArgumentException("customer name cannot be blank");
-        if (medName == null || medName.isBlank())
+        if (medicationName == null || medicationName.isBlank())
             throw new IllegalArgumentException("medicine name cannot be blank");
-        if (qty <= 0) throw new IllegalArgumentException("quantity must be positive");
+        if (quantity <= 0) throw new IllegalArgumentException("quantity must be positive");
         if (total == null) throw new IllegalArgumentException("total cannot be null");
     }
 }

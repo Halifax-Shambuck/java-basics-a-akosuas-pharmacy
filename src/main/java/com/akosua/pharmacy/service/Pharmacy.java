@@ -72,10 +72,10 @@ public class Pharmacy {
         return customer.applyDiscount(subtotal);
     }
 
-    private void recordTransaction(String customerName, String medName, int quantity, Money total, TransactionType type,
+    private void recordTransaction(String customerName, String medicationName, int quantity, Money total, TransactionType type,
             String prescriber) {
         transactions
-                .add(new Transaction(transactionCounter++, customerName, medName, quantity, total, type, prescriber));
+                .add(new Transaction(transactionCounter++, customerName, medicationName, quantity, total, type, prescriber));
     }
 
     private void announceDispense(Customer customer, Medication medication, int quantity, DispenseRequest request,
