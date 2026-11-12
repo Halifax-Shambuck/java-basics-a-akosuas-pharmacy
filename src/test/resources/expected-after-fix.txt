@@ -8,3 +8,5 @@ Stock levels:
   Paracetamol 500mg (OTC): 148 in stock
   Amoxicillin 250mg (PRESCRIPTION): 39 in stock
 Transactions today: 3
+Rejected dispenses today: 1
+  REJECTED: Amoxicillin 250mg - Cannot dispense 100 units of Amoxicillin 250mg: only 39 in stock

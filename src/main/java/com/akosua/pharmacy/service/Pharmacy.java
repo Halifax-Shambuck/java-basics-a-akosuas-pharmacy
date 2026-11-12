@@ -20,6 +20,13 @@ public class Pharmacy {
     private final List<Customer> customers = new ArrayList<>();
     private final List<Transaction> transactions = new ArrayList<>();
 
+    // each rejected dispense is logged separately so the pharmacy can audit
+    // what was attempted and why it failed, without polluting the transaction list
+    private record RejectedDispense(String medicationName, String reason) {
+    }
+
+    private final List<RejectedDispense> rejections = new ArrayList<>();
+
     public Pharmacy(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Pharmacy name cannot be blank");
@@ -41,13 +48,15 @@ public class Pharmacy {
         Money total;
         DispenseRequest request;
         try {
-            // check, price, and reduce stock first; announce and record only after all can-fail steps succeed
+            // check, price, and reduce stock first; announce and record only after all
+            // can-fail steps succeed
 
             request = new DispenseRequest(medication.getName(), quantity, prescriber);
             medication.validate(request);
             total = calculateTotal(customer, medication, quantity);
             medication.reduceStock(quantity);
         } catch (DispenseRejectedException e) {
+            rejections.add(new RejectedDispense(medication.getName(), e.getMessage()));
             System.out.println(e.getMessage());
             return;
         }
@@ -72,10 +81,12 @@ public class Pharmacy {
         return customer.applyDiscount(subtotal);
     }
 
-    private void recordTransaction(String customerName, String medicationName, int quantity, Money total, TransactionType type,
+    private void recordTransaction(String customerName, String medicationName, int quantity, Money total,
+            TransactionType type,
             String prescriber) {
         transactions
-                .add(new Transaction(transactionCounter++, customerName, medicationName, quantity, total, type, prescriber));
+                .add(new Transaction(transactionCounter++, customerName, medicationName, quantity, total, type,
+                        prescriber));
     }
 
     private void announceDispense(Customer customer, Medication medication, int quantity, DispenseRequest request,
@@ -91,6 +102,10 @@ public class Pharmacy {
         return Collections.unmodifiableList(transactions);
     }
 
+    public List<RejectedDispense> getRejections() {
+        return Collections.unmodifiableList(rejections);
+    }
+
     public void printReport() {
         System.out.println();
         System.out.println("=== " + name + " - end of day ===");
@@ -100,5 +115,10 @@ public class Pharmacy {
                     + medication.getStock() + " in stock");
         }
         System.out.println("Transactions today: " + transactions.size());
+        System.out.println("Rejected dispenses today: " + rejections.size());
+        for (RejectedDispense r : rejections) {
+            System.out.println("  REJECTED: " + r.medicationName() + " - " + r.reason());
+        }
+
     }
 }
