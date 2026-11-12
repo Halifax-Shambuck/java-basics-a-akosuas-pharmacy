@@ -1,6 +1,7 @@
 package com.akosua.pharmacy.service;
 
 import com.akosua.pharmacy.model.Medication;
+import com.akosua.pharmacy.model.Money;
 import com.akosua.pharmacy.model.Customer;
 import com.akosua.pharmacy.model.Transaction;
 import com.akosua.pharmacy.model.TransactionType;
@@ -37,13 +38,12 @@ public class Pharmacy {
     // Dispense medicine to a customer. The medication's rule decides whether the
     // request is acceptable and what appears in the confirmation line.
     public void dispense(Customer c, Medication m, int qty, String prescriber) {
-        double total = 0;
+        Money total = Money.ZERO;
         try {
             DispenseRequest request = new DispenseRequest(m.getName(), qty, prescriber);
             m.validate(request);
-            // Discount applies to the subtotal (price * qty), not to the unit price.
-            // Changing the order of multiplication can shift the last floating-point bit.
-            double subtotal = m.getPrice() * qty;
+            // Discount applies to the subtotal because that is the business rule.
+            Money subtotal = m.getPrice().multiplyBy(qty);
             total = c.applyDiscount(subtotal);
 
             m.reduceStock(qty);
@@ -62,8 +62,9 @@ public class Pharmacy {
     public void restock(Medication m, int qty) {
         m.increaseStock(qty);
 
-        transactions.add(new Transaction(transactionCounter++, "(supplier)", m.getName(), qty, 0,
-                TransactionType.RESTOCK, null));
+        transactions.add(new Transaction(transactionCounter++, "(supplier)", m.getName(), qty, Money.ZERO,
+        TransactionType.RESTOCK, null));
+
         System.out.println("Restocked " + qty + " x " + m.getName());
     }
 

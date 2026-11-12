@@ -6,7 +6,7 @@ public interface Customer {
 
     // Returns the amount owed after applying whatever discount this customer type
     // has. Walk-in customers return the subtotal unchanged.
-    double applyDiscount(double subtotal);
+    Money applyDiscount(Money subtotal);
 
     // Records that this customer received a dispense. Pharmacy passes the raw
     // facts and each implementation decides what to do with them.

@@ -16,7 +16,7 @@ public class WalkInCustomer implements Customer {
     }
 
     @Override
-    public double applyDiscount(double subtotal) {
+    public Money applyDiscount(Money subtotal) {
         // Walk-in customers have no discount, so the subtotal is returned unchanged.
         return subtotal;
     }

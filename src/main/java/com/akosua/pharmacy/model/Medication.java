@@ -6,19 +6,17 @@ import java.util.Objects;
 
 public class Medication {
     private final String name;
-    private final double price;
+    private final Money price;
     private int stock;
     private final DispensingRule rule;
     private final int id;
     private static int counter = 1;
 
-    public Medication(String name, double price, int stock, DispensingRule rule) {
+    public Medication(String name, Money price, int stock, DispensingRule rule) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Medication name cannot be blank");
         }
-        if (price < 0) {
-            throw new IllegalArgumentException("Price cannot be negative");
-        }
+        Objects.requireNonNull(price, "price cannot be null");
         if (stock < 0) {
             throw new IllegalArgumentException("Starting stock cannot be negative");
         }
@@ -81,7 +79,7 @@ public class Medication {
         return name;
     }
 
-    public double getPrice() {
+    public Money getPrice() {
         return price;
     }
 

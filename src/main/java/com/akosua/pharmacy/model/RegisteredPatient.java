@@ -1,5 +1,6 @@
 package com.akosua.pharmacy.model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 // Dispense history is tracked here because the business only needs it for
 // registered patients, not walk-in customers.
 public class RegisteredPatient implements Customer {
-    private static final double REGISTERED_DISCOUNT = 0.95;
+    private static final BigDecimal REGISTERED_DISCOUNT = new BigDecimal("0.95");
 
     private final String name;
     private final String phone;
@@ -31,11 +32,12 @@ public class RegisteredPatient implements Customer {
     }
 
     @Override
-    public double applyDiscount(double subtotal) {
+    public Money applyDiscount(Money subtotal) {
         // Multiply the subtotal by 0.95 directly. Storing 0.05 and computing
         // 1 - 0.05 can differ in the last bit due to floating-point precision,
         // which would break the golden output test.
-        return subtotal * REGISTERED_DISCOUNT;
+        return subtotal.multiplyBy(REGISTERED_DISCOUNT);
+
     }
 
     @Override
