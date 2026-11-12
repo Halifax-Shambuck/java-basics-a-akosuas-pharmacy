@@ -15,7 +15,7 @@ public record Money(BigDecimal amount) {
         if (amount.signum() < 0) {
             throw new IllegalArgumentException("amount cannot be negative");
         }
-        // stripTrailingZeros gives one canonical form so 2.50 and 2.00 compare equal
+        // stripTrailingZeros gives one canonical form so 2.0 and 2.00 both normalise to 2 and compare equal under the record's generated equals
         amount = amount.stripTrailingZeros();
     }
 
@@ -46,7 +46,7 @@ public record Money(BigDecimal amount) {
 
     @Override
     public String toString() {
-        java.math.BigDecimal normalised = amount.stripTrailingZeros();
+        BigDecimal normalised = amount;
         if (normalised.scale() < 1) {
             normalised = normalised.setScale(1);
         }
