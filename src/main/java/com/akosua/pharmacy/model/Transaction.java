@@ -3,8 +3,9 @@ package com.akosua.pharmacy.model;
 // A transaction is an immutable historical fact recorded after a successful
 // dispense or restock. Using a record enforces that it cannot change after
 // creation and gives readable toString output automatically.
-// prescriber is null for OTC dispenses and restocks. It is only set when a
-// prescription was verified by the rule before the dispense went ahead.
+// prescriber holds whatever the caller supplied at the call site.
+// Only rules that require a prescriber verify it; OTC rules ignore it entirely.
+
 public record Transaction(
         int id,
         String customerName,
