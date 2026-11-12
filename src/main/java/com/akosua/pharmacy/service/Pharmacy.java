@@ -38,34 +38,50 @@ public class Pharmacy {
     // Dispense medicine to a customer. The medication's rule decides whether the
     // request is acceptable and what appears in the confirmation line.
     public void dispense(Customer customer, Medication medication, int quantity, String prescriber) {
-        Money total = Money.ZERO;
+        Money total;
+        DispenseRequest request;
         try {
-            DispenseRequest request = new DispenseRequest(medication.getName(), quantity, prescriber);
+            // check, price, and reduce stock first; announce and record only after all can-fail steps succeed
+
+            request = new DispenseRequest(medication.getName(), quantity, prescriber);
             medication.validate(request);
-            // Discount applies to the subtotal because that is the business rule.
-            Money subtotal = medication.getPrice().multiplyBy(quantity);
-            total = customer.applyDiscount(subtotal);
-
+            total = calculateTotal(customer, medication, quantity);
             medication.reduceStock(quantity);
-            System.out.println("Dispensed " + quantity + " x " + medication.getName() + " to " + customer.getName()
-                    + medication.confirmationSuffix(request) + " for GHS " + total);
-            customer.recordDispense(medication.getName(), quantity);
-            transactions.add(new Transaction(transactionCounter++, customer.getName(), medication.getName(), quantity, total,
-                    TransactionType.DISPENSE, request.prescriber()));
-
         } catch (DispenseRejectedException e) {
             System.out.println(e.getMessage());
             return;
         }
+
+        announceDispense(customer, medication, quantity, request, total);
+        customer.recordDispense(medication.getName(), quantity);
+        recordTransaction(customer.getName(), medication.getName(), quantity, total, TransactionType.DISPENSE,
+                request.prescriber());
     }
 
     public void restock(Medication medication, int quantity) {
         medication.increaseStock(quantity);
 
-        transactions.add(new Transaction(transactionCounter++, "(supplier)", medication.getName(), quantity, Money.ZERO,
-        TransactionType.RESTOCK, null));
+        recordTransaction("(supplier)", medication.getName(), quantity, Money.ZERO, TransactionType.RESTOCK, null);
 
         System.out.println("Restocked " + quantity + " x " + medication.getName());
+    }
+
+    private Money calculateTotal(Customer customer, Medication medication, int quantity) {
+        // Discount applies to the subtotal because that is the business rule.
+        Money subtotal = medication.getPrice().multiplyBy(quantity);
+        return customer.applyDiscount(subtotal);
+    }
+
+    private void recordTransaction(String customerName, String medName, int quantity, Money total, TransactionType type,
+            String prescriber) {
+        transactions
+                .add(new Transaction(transactionCounter++, customerName, medName, quantity, total, type, prescriber));
+    }
+
+    private void announceDispense(Customer customer, Medication medication, int quantity, DispenseRequest request,
+            Money total) {
+        System.out.println("Dispensed " + quantity + " x " + medication.getName() + " to " + customer.getName()
+                + medication.confirmationSuffix(request) + " for GHS " + total);
     }
 
     // Returns an unmodifiable view of the transaction list. The view reflects
@@ -80,7 +96,8 @@ public class Pharmacy {
         System.out.println("=== " + name + " - end of day ===");
         System.out.println("Stock levels:");
         for (Medication medication : medications) {
-            System.out.println("  " + medication.getName() + " (" + medication.categoryLabel() + "): " + medication.getStock() + " in stock");
+            System.out.println("  " + medication.getName() + " (" + medication.categoryLabel() + "): "
+                    + medication.getStock() + " in stock");
         }
         System.out.println("Transactions today: " + transactions.size());
     }
